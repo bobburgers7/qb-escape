@@ -85,17 +85,18 @@ def ReadTransaction(reader):
     trans.BeginEdit()
     trans.SetCurrency(dollars)
 
-    description = ( "(qb: " +
-                    "Type: " +  entry['Type'])
-
-    try:
-        if entry['Num']:
-            description = description + " Num: " + entry['Num']
-    except KeyError:
-        pass
-
-    description = description + ")"
+    # Use the 'Name' field for the main description
+    description = entry['Name'] if entry['Name'] else "Unknown Payee"
     trans.SetDescription(description)
+
+    # Create a memo with the type and number information
+    memo = f"(qb: Type: {entry['Type']}"
+    if entry.get('Num'):  # Using .get() to avoid KeyError
+        memo += f" Num: {entry['Num']}"
+    memo += ")"
+
+    # Set the memo for the transaction
+    trans.SetNotes(memo)
 
     trans.SetNum(entry['Trans #'])
     SetDate(trans, entry['Date'])
